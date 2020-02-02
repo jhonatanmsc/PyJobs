@@ -36,7 +36,7 @@ class Profile(models.Model):
         default="",
         help_text="Descreva um pouco sobre você para as empresas poderem te conhecer melhor!",
     )
-
+    on_mailing_list = models.BooleanField("Está na mailing list", default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     skills = models.ManyToManyField("Skill")
 
@@ -147,6 +147,9 @@ class Job(models.Model):
 
     def get_premium_jobs():
         return Job.objects.premium().created_in_the_last(30, premium=True)[:7]
+
+    def get_index_display_jobs():
+        return Job.objects.public().created_in_the_last(30)[:9]
 
     def get_publicly_available_jobs(term=None):
         return Job.objects.not_premium().created_in_the_last(30).search(term)

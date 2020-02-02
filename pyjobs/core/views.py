@@ -26,6 +26,19 @@ from pyjobs.core.utils import generate_thumbnail
 
 
 def index(request):
+    publicly_available_jobs = Job.get_index_display_jobs()
+
+    user_filtered_query_set = JobFilter(request.GET, queryset=publicly_available_jobs)
+
+    context_dict = {
+        "publicly_available_jobs": publicly_available_jobs,
+        "filter": user_filtered_query_set,
+    }
+
+    return render(request, template_name="index.html", context=context_dict)
+
+
+def jobs(request):
     publicly_available_jobs = Job.get_publicly_available_jobs()
 
     user_filtered_query_set = JobFilter(request.GET, queryset=publicly_available_jobs)
@@ -49,7 +62,7 @@ def index(request):
         "filter": user_filtered_query_set,
     }
 
-    return render(request, template_name="index.html", context=context_dict)
+    return render(request, template_name="jobs.html", context=context_dict)
 
 
 def services_view(request):
@@ -69,6 +82,8 @@ def job_view(request, pk):
     context = {
         "job": get_object_or_404(Job, pk=pk),
         "logged_in": False,
+        "next_job_pk": int(pk) + 1,
+        "previous_job_pk": int(pk) - 1,
     }
 
     context["title"] = context["job"].title
@@ -270,13 +285,6 @@ class PremiumJobsFeed(Feed):
 
     def item_pubdate(self, item):
         return datetime.now()
-
-
-def jooble_feed(request):
-    jobs = Job.objects.all()
-    return render(
-        request, "jooble.xml", context={"jobs": jobs}, content_type="text/xml"
-    )
 
 
 @login_required
